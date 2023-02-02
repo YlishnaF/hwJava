@@ -11,7 +11,7 @@ public class WildcardMain {
 //        wildcardExamples();
 
 
-        List<B> foo = foo(new ArrayList<A>(), new ArrayList<C>());
+//        List<B> foo = foo(new ArrayList<A>(), new ArrayList<C>());
 
     }
 

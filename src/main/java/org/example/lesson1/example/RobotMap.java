@@ -3,13 +3,19 @@ package org.example.lesson1.example;
 import java.util.*;
 
 public class RobotMap {
+    public List<Robot> getRobots() {
+        return robots;
+    }
 
     private final int n;
     private final int m;
     private final List<Robot> robots;
 
-    public RobotMap(int n, int m, int maxRobotCount) {
-        // TODO: 13.01.2023 Реализовать проверку входных параметров.
+    public RobotMap(int n, int m) throws RobotMapCreationException {
+        if (n < 0 || m < 0) {
+            throw new RobotMapCreationException("Некоректный размер карты");
+        }
+
         this.n = n;
         this.m = m;
         this.robots = new ArrayList<>();
@@ -45,14 +51,24 @@ public class RobotMap {
 
         public static final Direction DEFAULT_DIRECTION = Direction.TOP;
 
-        private final UUID id;
+        private static Long idSequence = 1L;
+
+        private final Long id;
         private MapPoint point;
         private Direction direction;
 
+        public Direction getDirection() {
+            return direction;
+        }
+
         public Robot(MapPoint point) {
-            this.id = UUID.randomUUID();
+            this.id = idSequence++; //UUID.randomUUID();
             this.point = point;
             this.direction = DEFAULT_DIRECTION;
+        }
+
+        public Long getId() {
+            return id;
         }
 
         public void move() throws RobotMoveException {
@@ -63,6 +79,24 @@ public class RobotMap {
                     case RIGHT -> new MapPoint(point.getX(), point.getY() + 1);
                     case BOTTOM -> new MapPoint(point.getX() + 1, point.getY());
                     case LEFT -> new MapPoint(point.getX(), point.getY() - 1);
+                };
+
+                validatePoint(newPoint);
+            } catch (PointValidationException e) {
+                throw new RobotMoveException(e.getMessage(), this);
+            }
+
+            this.point = newPoint;
+        }
+
+        public void move(int n) throws RobotMoveException {
+            final MapPoint newPoint;
+            try {
+                newPoint = switch (direction) {
+                    case TOP -> new MapPoint(point.getX() - n, point.getY());
+                    case RIGHT -> new MapPoint(point.getX(), point.getY() + n);
+                    case BOTTOM -> new MapPoint(point.getX() + n, point.getY());
+                    case LEFT -> new MapPoint(point.getX(), point.getY() - n);
                 };
 
                 validatePoint(newPoint);
