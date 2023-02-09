@@ -2,10 +2,10 @@ package org.example.lesson1.example;
 
 import java.util.*;
 
-public class RobotMap {
-    public List<Robot> getRobots() {
-        return robots;
-    }
+public class RobotMap implements RobotMapInterface{
+//    public List<Robot> getRobots() {
+//        return robots;
+//    }
 
     private final int n;
     private final int m;
@@ -35,6 +35,57 @@ public class RobotMap {
         return robot;
     }
 
+    @Override
+    public String info() {
+        List<String> robotsInfo = new ArrayList<>();
+        for (Robot r : robots) {
+            robotsInfo.add("id: " + r.getId() + ", point: " + r.getPoint());
+        }
+        return robotsInfo.toString();
+    }
+
+    @Override
+    public String changeDirection(Long id, String s) {
+        RobotInterface r = getRobot(id);
+            if (r.getId() == id) {
+                switch (s) {
+                    case "t":
+                        r.changeDirection(Direction.TOP);
+                        return "Direction TOP";
+                    case "b":
+                        r.changeDirection(Direction.BOTTOM);
+                        return "Direction Bottom";
+                    case "l":
+                        r.changeDirection(Direction.LEFT);
+                        return "Direction Left";
+                    case "r":
+                        r.changeDirection(Direction.RIGHT);
+                        return "Direction Right";
+                    default:
+                        return "Direction not changed";
+                }
+
+        }
+        return "";
+    }
+
+    @Override
+    public RobotInterface getRobot(Long id) {
+        for (RobotInterface r: robots) {
+            if(Objects.equals(r.getId(), id)){
+                return r;
+            };
+        }
+        return null;
+    }
+
+    @Override
+    public void move(Long id, int n) throws RobotMoveException {
+        RobotInterface r = getRobot(id);
+        r.move(n);
+    }
+
+
     private void validatePoint(Point point) throws PointValidationException {
         validatePointIsFree(point);
     }
@@ -47,7 +98,7 @@ public class RobotMap {
         }
     }
 
-    public class Robot {
+    public class Robot implements RobotInterface{
 
         public static final Direction DEFAULT_DIRECTION = Direction.TOP;
 
@@ -105,6 +156,7 @@ public class RobotMap {
             }
 
             this.point = newPoint;
+            System.out.println(direction.toString());
         }
 
         public void changeDirection(Direction direction) {

@@ -17,7 +17,8 @@ public class Main {
         System.out.println("Добро пожаловать в игру!");
         System.out.println("...описание...");
 
-        RobotMap map;
+        RobotMapFactory mapFactory = new RobotMapFactory();
+        RobotMapInterface map;
         while (true) {
             System.out.println("Для создания карты введите 2 положительных числа через пробел");
             try {
@@ -25,7 +26,7 @@ public class Main {
                 int m = userInput.nextInt();
                 userInput.nextLine();
 
-                map = new RobotMap(n, m);
+                map = mapFactory.create(n, m);
                 break;
             } catch (RobotMapCreationException | InputMismatchException e) {
                 System.err.println("Возникла ошибка при создании карты: " + e.getMessage());
@@ -62,10 +63,10 @@ public class Main {
 
     private static class CommandManager {
 
-        private final RobotMap map;
+        private final RobotMapInterface map;
         private final Map<String, CommandExecutor> commands;
 
-        public CommandManager(RobotMap map) {
+        public CommandManager(RobotMapInterface map) {
             this.map = map;
 
             commands = new HashMap<>();
@@ -110,61 +111,28 @@ public class Main {
         }
 
         private String listRobots(String[] args) {
-            List<String> robotsInfo = new ArrayList<>();
-            for (RobotMap.Robot r : map.getRobots()) {
-                robotsInfo.add("id: " + r.getId() + ", point: " + r.getPoint());
-            }
-            return robotsInfo.toString();
+            return map.info();
         }
 
         private String changeDirection(String[] args) throws CommandExecutionException {
             if (args.length < 2) {
                 throw new CommandExecutionException("Недостаточно аргументов");
             }
-            for (RobotMap.Robot r : map.getRobots()) {
-                if (r.getId() == Long.parseLong(args[0])) {
-                    switch (args[1]) {
-                        case "t":
-                            r.changeDirection(Direction.TOP);
-                            return "Direction TOP";
-                        case "b":
-                            r.changeDirection(Direction.BOTTOM);
-                            return "Direction Bottom";
-                        case "l":
-                            r.changeDirection(Direction.LEFT);
-                            return "Direction Left";
-                        case "r":
-                            r.changeDirection(Direction.RIGHT);
-                            return "Direction Right";
-                        default:
-                            return "Direction not changed";
-                    }
-                }
-            }
-            return "";
+            Long l = Long.parseLong(args[0]);
+            return map.changeDirection(l, args[1]);
         }
 
         private String move(String[] args) throws CommandExecutionException, RobotMoveException {
-            if (args.length!=2 & args.length!=1) {
+            if (args.length != 2 & args.length != 1) {
                 throw new CommandExecutionException("Неверное количество аргументов");
             }
             if (args.length == 1) {
-                for (RobotMap.Robot r : map.getRobots()) {
-                    if (r.getId() == Long.parseLong(args[0])) {
-                        r.move();
-                        return "Переместились на один шаг " + r.getDirection();
-                    }
-                }
-
+                map.move(Long.parseLong(args[0]), 0);
+                return "Переместились на один шаг ";
             } else {
-                for (RobotMap.Robot r : map.getRobots()) {
-                    if (r.getId() == Long.parseLong(args[0])) {
-                        r.move(Integer.parseInt(args[1]));
-                        return "Переместились на " + Integer.parseInt(args[1]) + " шагов " + r.getDirection();
-                    }
-                }
+                map.move(Long.parseLong(args[0]), Integer.parseInt(args[1]));
+                return "Переместились на " + Integer.parseInt(args[1]) + " шагов ";
             }
-            return "";
         }
 
         private String printHelp(String[] args) {
